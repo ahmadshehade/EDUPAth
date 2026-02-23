@@ -2,11 +2,13 @@
 
 namespace App\Services\Auth;
 
+use App\Enums\NameOfCahce;
 use App\Interfaces\AuthInterface;
 use App\Models\User;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 class AuthService implements AuthInterface {
@@ -22,6 +24,7 @@ class AuthService implements AuthInterface {
             $data['password']=Hash::make($data['password']);
             $user = User::create($data);
             $token = $user->createToken('auth_user')->plainTextToken;
+            Cache::forget(NameOfCahce::Users->value);
             return [$user, $token];
         } catch (Exception $e) {
 
