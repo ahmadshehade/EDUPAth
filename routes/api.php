@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Auth\GitHubAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth\GoogleAuthController;
+use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RolesAndPermissions\PermissionController;
 use App\Http\Controllers\Api\V1\RolesAndPermissions\RoleController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -122,14 +123,20 @@ Route::prefix('v1/permissions')->middleware(['can:adminJob'])
             ->name('permissions.removeFromRole');
     });
 
-    Route::prefix('v1/users')->middleware(['auth:sanctum'])
-    ->group(function(){
-       Route::get('/',[UserController::class,'index'])
-       ->name('users.all');
-       Route::get('/{user}',[UserController::class,'show'])
-       ->name('users.show');
-       Route::post('/{user}',[UserController::class,'update'])
-       ->name('users.update');
-       Route::delete('/{user}',[UserController::class,'destroy'])
-       ->name('users.destroy');
+
+Route::prefix('v1/users')->middleware(['auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [UserController::class, 'index'])
+            ->name('users.all');
+        Route::get('/{user}', [UserController::class, 'show'])
+            ->name('users.show');
+        Route::post('/{user}', [UserController::class, 'update'])
+            ->name('users.update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])
+            ->name('users.destroy');
+    });
+
+Route::prefix('v1')->middleware(['auth:sanctum'])
+    ->group(function () {
+        Route::apiResource('profiles', ProfileController::class);
     });

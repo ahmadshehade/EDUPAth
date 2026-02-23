@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Mail\ResetPasswordMail;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,7 +18,7 @@ use Spatie\Translatable\HasTranslations;
 class User extends Authenticatable {
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasTranslations, HasApiTokens,HasRoles;
+    use HasFactory, Notifiable, HasTranslations, HasApiTokens, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -75,8 +76,26 @@ class User extends Authenticatable {
      * @return void
      */
     public function sendPasswordResetNotification($token) {
-         Log::info('Sending password reset email to: ' . $this->email . ' with token: ' . $token);
+        Log::info('Sending password reset email to: ' . $this->email . ' with token: ' . $token);
         Mail::to($this->email)
             ->send(new ResetPasswordMail($this, $token));
+    }
+
+    /**
+     * Summary of getCreatedAtAttributes
+     * @param mixed $value
+     * @return string
+     */
+    public function getCreatedAtAttributes($value) {
+        return Carbon::parse($value)->format('Y-m-d H:i');
+    }
+
+    /**
+     * Summary of getUpdatedAtAttributes
+     * @param mixed $value
+     * @return string
+     */
+    public function getUpdatedAtAttributes($value) {
+        return Carbon::parse($value)->format('Y-m-d H:i');
     }
 }
