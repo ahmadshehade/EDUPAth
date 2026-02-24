@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum NameOfCahce: string
+enum NameOfCache: string
 {
     case Users = 'user_all';
     case Profiles ='profile_all';

@@ -2,33 +2,33 @@
 
 namespace App\Http\Requests\User;
 
+use App\Http\Requests\BaseRequest;
 use App\Rules\RegixPassword;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
-class UpdateUserRequest extends FormRequest
-{
+class UpdateUserRequest extends BaseRequest {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return Gate::allows('update', $this->route('user'));
     }
 
     /**
      * Prepare the data for validation.
      */
-    public function prepareForValidation(): void
-    {
-        $this->merge([
-            'name' => [
-                'ar' => $this->input('name.ar'),
-                'en' => $this->input('name.en'), // تم التصحيح
-            ]
-        ]);
+    public function prepareForValidation(): void {
+        if ($this->has('name')) {
+            $this->merge([
+                'name' => array_filter([
+                      'ar' => $this->input('name.ar'),
+                    'en' => $this->input('name.en'),
+                ],fn($value) =>!is_null($value) )
+            ]);
+        }
     }
 
     /**
@@ -36,8 +36,7 @@ class UpdateUserRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         $user = $this->route('user');
 
         return [
@@ -51,8 +50,7 @@ class UpdateUserRequest extends FormRequest
     /**
      * Get custom messages for validator errors.
      */
-    public function messages(): array
-    {
+    public function messages(): array {
         return [
             'name.en.string'    => 'The name (English) must be a string.',
             'name.ar.string'    => 'The name (Arabic) must be a string.',
@@ -68,8 +66,7 @@ class UpdateUserRequest extends FormRequest
     /**
      * Get custom attributes for validator errors.
      */
-    public function attributes(): array
-    {
+    public function attributes(): array {
         return [
             'name.en'    => 'name (English)',
             'name.ar'    => 'name (Arabic)',

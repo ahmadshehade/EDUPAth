@@ -82,20 +82,20 @@ class User extends Authenticatable {
     }
 
     /**
-     * Summary of getCreatedAtAttributes
+     * Summary of getCreatedAtAttribute
      * @param mixed $value
      * @return string
      */
-    public function getCreatedAtAttributes($value) {
+    public function getCreatedAtAttribute($value) {
         return Carbon::parse($value)->format('Y-m-d H:i');
     }
 
     /**
-     * Summary of getUpdatedAtAttributes
+     * Summary of getUpdatedAtAttribute
      * @param mixed $value
      * @return string
      */
-    public function getUpdatedAtAttributes($value) {
+    public function getUpdatedAtAttribute($value) {
         return Carbon::parse($value)->format('Y-m-d H:i');
     }
 }

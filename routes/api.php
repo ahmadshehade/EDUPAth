@@ -136,7 +136,16 @@ Route::prefix('v1/users')->middleware(['auth:sanctum'])
             ->name('users.destroy');
     });
 
-Route::prefix('v1')->middleware(['auth:sanctum'])
+Route::prefix('v1/profiles')->middleware(['auth:sanctum'])
     ->group(function () {
-        Route::apiResource('profiles', ProfileController::class);
+        Route::get('/', [ProfileController::class, 'index'])
+            ->name('profiles.all');
+        Route::post('/', [ProfileController::class, 'store'])
+            ->name('profiles.store');
+        Route::get('/{profile}', [ProfileController::class, 'show'])
+            ->name('profiles.show');
+        Route::post('/{profile}', [ProfileController::class, 'update'])
+            ->name('profiles.update');
+        Route::delete('/{profile}', [ProfileController::class, 'destroy'])
+            ->name('profiles.delete');
     });

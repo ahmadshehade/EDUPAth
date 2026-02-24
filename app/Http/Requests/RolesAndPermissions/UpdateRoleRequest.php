@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\RolesAndPermissions;
 
+use App\Http\Requests\BaseRequest;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
-class UpdateRoleRequest extends FormRequest {
+class UpdateRoleRequest extends BaseRequest {
     /**
      * Determine if the user is authorized to make this request.
      */

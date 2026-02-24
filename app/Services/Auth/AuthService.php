@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Enums\NameOfCache;
 use App\Enums\NameOfCahce;
 use App\Interfaces\AuthInterface;
 use App\Models\User;
@@ -24,7 +25,7 @@ class AuthService implements AuthInterface {
             $data['password']=Hash::make($data['password']);
             $user = User::create($data);
             $token = $user->createToken('auth_user')->plainTextToken;
-            Cache::forget(NameOfCahce::Users->value);
+            Cache::forget(NameOfCache::class::Users->value);
             return [$user, $token];
         } catch (Exception $e) {
 

@@ -2,12 +2,16 @@
 
 namespace App\Services\User;
 
+use App\Enums\NameOfCache;
 use App\Enums\NameOfCahce;
 use App\Models\Profile;
 use App\Traits\FilterableServiceTrait;
 use Exception;
+use Illuminate\Http\Client\HttpClientException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProfileService {
@@ -19,9 +23,9 @@ class ProfileService {
      * @param array $filters
      */
     public function getAll(array $filters = []) {
-        return Cache::remember(NameOfCahce::Profiles->value, now()->addMinutes(2), function () use ($filters) {
-            $profiles = Profile::query();
-            return $this->applyFilters($profiles, $filters)->with(['user']);
+        return Cache::remember(NameOfCache::Profiles->value, now()->addMinutes(2), function () use ($filters) {
+            $profiles = Profile::query()->with(['user','media']);
+            return $this->applyFilters($profiles, $filters);
         });
     }
     /**
@@ -31,11 +35,21 @@ class ProfileService {
      */
     public function store(array $data) {
         try {
+            DB::beginTransaction();
             $data['user_id'] = auth('api')->user()->id;
+            if(auth('api')->user()->profile){
+                throw new HttpClientException("User Already Have Profile.",500);
+            }
             $profile = Profile::create($data);
-            Cache::forget(NameOfCahce::Profiles->value);
-            return $profile->load('user');
+            Cache::forget(NameOfCache::Profiles->value);
+            $image = $data['image'] ?? null;
+            if ($image instanceof UploadedFile && $image->isValid()) {
+                $profile->addMedia($image)->toMediaCollection('profile');
+            }
+            DB::commit();
+            return $profile->load(['user','media']);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error('Fail To Make Profile .' . $e->getMessage());
             throw $e;
         }
@@ -46,23 +60,37 @@ class ProfileService {
      * @return Model|\stdClass
      */
     public function get(Model $profile) {
-        $data = $profile->with('users')->firstOrFail();
+        $data = $profile->with('user')->firstOrFail();
         return $data;
     }
     /**
      * Summary of update
      * @param Model $profile
      * @param array $data
-     * @return bool|int
+     * @throws Exception
+     * @return Model
      */
     public function update(Model $profile, array $data) {
         try {
-            $dataUpdated = $profile->update($data);
-            Cache::forget(NameOfCahce::Profiles->value);
-            return  $dataUpdated;
-            
+            DB::beginTransaction();
+            $updated = $profile->update($data);
+            if (!$updated) {
+                throw new Exception('Failed to update profile');
+            }
+            Cache::forget(NameOfCache::Profiles->value);
+            $image = $data['image'] ?? null;
+            if ($image && $image instanceof UploadedFile && $image->isValid()) {
+                if ($profile->hasMedia('profile')) {
+                    $profile->getFirstMedia('profile')->delete();
+                }
+                $profile->addMedia($image)->toMediaCollection('profile');
+            }
+
+            DB::commit();
+            return $profile->load(['user','media']);
         } catch (Exception $e) {
-            Log::error('Fail To Update Profile .' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Fail To Update Profile ' . $e->getMessage());
             throw $e;
         }
     }
@@ -73,8 +101,19 @@ class ProfileService {
      * @return bool|int|mixed|null
      */
     public function destroy(Model $profile) {
-        $success=$profile->delete();
-         Cache::forget(NameOfCahce::Profiles->value);
-        return $success;
+        try {
+            DB::beginTransaction();
+            if ($profile->hasMedia('profile')) {
+                $profile->getFirstMedia('profile')->delete();
+            }
+            $success = $profile->delete();
+            Cache::forget(NameOfCache::Profiles->value);
+            DB::commit();
+            return $success;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Fail To Delete Profile: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }

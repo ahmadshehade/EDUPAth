@@ -2,6 +2,7 @@
 
 namespace App\Services\User;
 
+use App\Enums\NameOfCache;
 use App\Enums\NameOfCahce;
 use App\Models\User;
 use App\Traits\FilterableServiceTrait;
@@ -20,7 +21,7 @@ class UserService {
      */
     public  function getAll(array $filters = []) {
 
-        $cacheKey = NameOfCahce::Users->value;
+        $cacheKey = NameOfCache::Users->value;
         return Cache::remember($cacheKey, now()->addDay(), function () use ($filters) {
             $users = User::query();
             return $this->applyFilters($users, $filters);
@@ -39,13 +40,13 @@ class UserService {
      * Summary of update
      * @param Model $user
      * @param array $data
-     * @return bool|int
+     * @return Model
      */
     public  function update(Model  $user, array $data) {
         try {
-            $data = $user->update($data);
-             Cache::forget(NameOfCahce::Users->value);
-            return $data;
+             $user->update($data);
+             Cache::forget(NameOfCache::Users->value);
+            return $user;
         } catch (Exception $e) {
             Log::error('Fail To Update User Information .' . $e->getMessage());
             throw $e;
@@ -59,7 +60,7 @@ class UserService {
     public function destroy(Model $user) {
 
         $success = $user->delete();
-        Cache::forget(NameOfCahce::Users->value);
+        Cache::forget(NameOfCache::Users->value);
         return $success;
     }
 }
