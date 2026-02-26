@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
-enum NameOfCache: string
-{
+/**
+ * Summary of NameOfCache
+ */
+enum NameOfCache: string {
     case Users = 'user_all';
-    case Profiles ='profile_all';
+    case Profiles = 'profile_all';
+
+    case Category = 'category_all';
 }
