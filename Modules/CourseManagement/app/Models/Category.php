@@ -5,6 +5,7 @@ namespace Modules\CourseManagement\Models;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -29,7 +30,6 @@ class Category extends Model implements HasMedia {
     protected function casts() {
         return [
             'name' => 'array',
-            'slug' => 'string',
             'parent_id' => 'integer'
         ];
     }
@@ -57,5 +57,13 @@ class Category extends Model implements HasMedia {
     protected static function newFactory(): CategoryFactory
     {
         return CategoryFactory::new();
+    }
+
+    /**
+     * Summary of category
+     * @return HasMany<Category, Category>
+     */
+    public function category():HasMany{
+        return $this->hasMany(Category::class,'category_id');
     }
 }

@@ -7,11 +7,13 @@ namespace App\Models;
 use App\Mail\ResetPasswordMail;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\CourseManagement\Models\Course;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Translatable\HasTranslations;
 
@@ -97,5 +99,13 @@ class User extends Authenticatable {
      */
     public function getUpdatedAtAttribute($value) {
         return Carbon::parse($value)->format('Y-m-d H:i');
+    }
+
+    /**
+     * Summary of courses
+     * @return HasMany<Course, User>
+     */
+    public  function courses():HasMany{
+       return $this->hasMany(Course::class,'instructor_id');
     }
 }

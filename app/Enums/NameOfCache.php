@@ -10,4 +10,5 @@ enum NameOfCache: string {
     case Profiles = 'profile_all';
 
     case Category = 'category_all';
+    case Course = "course_all";
 }

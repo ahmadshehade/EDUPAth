@@ -22,6 +22,10 @@ class DatabaseSeeder extends Seeder
             RoleTableSeeder::class,
             AdminTableSeeder::class,
             CategoryTableSeeder::class,
+            CourseTableSeeder::class,
+            UserTableSeeder::class,
+            RoleTableSeeder::class,
+            AssignRolesToUsers::class
         ]);
     }
 }
