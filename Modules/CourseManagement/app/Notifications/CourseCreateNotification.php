@@ -6,7 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class CourseCreateNotification extends Notification  {
+class CourseCreateNotification extends Notification {
     use Queueable;
 
     protected $user_id;
@@ -39,6 +39,7 @@ class CourseCreateNotification extends Notification  {
             ->line(' Make New Course')
             ->line('Course Title (EN): ' . $titleEn)
             ->line('عنوان الدورة (AR): ' . $titleAr)
+            ->line('Published: ' . ($this->course->is_published ? "True" : "False"))
             ->line('Thank you for using our application!');
     }
 

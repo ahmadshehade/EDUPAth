@@ -39,6 +39,7 @@ class CourseUpdateNotification extends Notification {
             ->line(' Update  Course')
             ->line('Course Title (EN): ' . $titleEn)
             ->line('عنوان الدورة (AR): ' . $titleAr)
+            ->line('Published: ' . ($this->course->is_published ? "True" : "False"))
             ->line('Thank you for using our application!');
     }
 
