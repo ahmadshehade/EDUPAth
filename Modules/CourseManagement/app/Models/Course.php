@@ -9,6 +9,7 @@ use Database\Factories\CourseFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -113,4 +114,14 @@ class Course extends Model implements HasMedia {
         }
         return $q->whereRaw('1 = 0');
     }
+
+    /**
+     * Summary of sections
+     * @return HasMany<Section, Course>
+     */
+    public function sections():HasMany{
+        return $this->hasMany(Section::class,'course_id');
+    }
+
+    
 }

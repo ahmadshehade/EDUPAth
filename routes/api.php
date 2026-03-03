@@ -26,17 +26,34 @@ Route::get('/user', function (Request $request) {
  */
 Route::prefix('v1')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register');
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])
+        ->middleware(['throttle:auth-attempts'])
+        ->name(name: 'login');
 
-    Route::post('/forgot-password', [ForgotPasswordController::class, 'forgot']);
-    Route::post('/reset-password', [ForgotPasswordController::class, 'reset']);
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'forgot'])
+        ->middleware(['throttle:auth-attempts'])
+        ->name('forget');
+
+    Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])
+        ->middleware(['throttle:auth-attempts'])
+        ->name('reset');
 
 
-    Route::get('auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('auth.google');
-    Route::get('auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+    Route::get('auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
+        ->middleware(['throttle:auth-attempts'])
+        ->name('auth.google');
 
-    Route::get('auth/github', [GitHubAuthController::class, 'redirectToGitHub']);
-    Route::get('auth/github/callback', [GitHubAuthController::class, 'handleGitHubCallback']);
+    Route::get('auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])
+        ->middleware(['throttle:auth-attempts'])
+        ->name('auth.google.callback');
+
+    Route::get('auth/github', [GitHubAuthController::class, 'redirectToGitHub'])
+        ->middleware(['throttle:auth-attempts'])
+        ->name('auth.github');
+
+    Route::get('auth/github/callback', [GitHubAuthController::class, 'handleGitHubCallback'])
+        ->middleware(['throttle:auth-attempts'])
+        ->name('auth.githubCallback');
 });
 
 
@@ -47,7 +64,7 @@ Route::prefix('v1')->group(function () {
  * They handle session management including logging out from the current device
  * and revoking all tokens (logout from all devices).
  */
-Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
+Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:auth-logout'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
     Route::post('logout-from-all', [AuthController::class, 'logoutFromAllToken'])
@@ -66,7 +83,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
  * 
  * @see App\Http\Controllers\Api\V1\RolesAndPermissions\RoleController
  */
-Route::prefix('v1/roles')->middleware(['auth:sanctum', 'can:adminJob'])
+Route::prefix('v1/roles')->middleware(['auth:sanctum', 'can:adminJob', 'throttle60,1'])
     ->group(function () {
         Route::get('/', [RoleController::class, 'index'])
             ->name('roles.all');
@@ -96,7 +113,7 @@ Route::prefix('v1/roles')->middleware(['auth:sanctum', 'can:adminJob'])
  * 
  * @see App\Http\Controllers\Api\V1\RolesAndPermissions\PermissionController
  */
-Route::prefix('v1/permissions')->middleware(['can:adminJob'])
+Route::prefix('v1/permissions')->middleware(['can:adminJob', 'throttle:60,1', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [PermissionController::class, 'index'])
             ->name('permissions.all');
@@ -124,7 +141,7 @@ Route::prefix('v1/permissions')->middleware(['can:adminJob'])
     });
 
 
-Route::prefix('v1/users')->middleware(['auth:sanctum'])
+Route::prefix('v1/users')->middleware(['auth:sanctum', 'throttle:20,1'])
     ->group(function () {
         Route::get('/', [UserController::class, 'index'])
             ->name('users.all');
@@ -136,7 +153,7 @@ Route::prefix('v1/users')->middleware(['auth:sanctum'])
             ->name('users.destroy');
     });
 
-Route::prefix('v1/profiles')->middleware(['auth:sanctum'])
+Route::prefix('v1/profiles')->middleware(['auth:sanctum', 'throttle:20,1'])
     ->group(function () {
         Route::get('/', [ProfileController::class, 'index'])
             ->name('profiles.all');
