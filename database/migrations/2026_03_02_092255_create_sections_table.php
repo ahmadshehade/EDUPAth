@@ -15,15 +15,14 @@ return new class extends Migration {
                 ->constrained()
                 ->cascadeOnDelete();
             $table->json('title'); 
-            $table->string('slug')->nullable();
-            $table->json('description')->nullable();
+            $table->string('slug')->unique()->nullable();
+            $table->json('description');
             $table->unsignedInteger('order')->default(1);
             $table->boolean('is_published')->default(false);
-            $table->unsignedInteger(column: 'duration')->nullable();
+            $table->unsignedInteger('duration')->nullable();
             $table->timestamps();
             $table->softDeletes();
-
-            $table->unique(['course_id', 'order']);
+            $table->unique(['course_id', 'order', 'deleted_at']);
         });
     }
 

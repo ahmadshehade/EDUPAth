@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Modules\CourseManagement\Models\Course;
 use Modules\CourseManagement\Models\Section;
+use Modules\CourseManagement\Rules\AtLeastOneLocale;
 
 class StoreSectionRequest extends BaseRequest {
 
@@ -34,12 +36,13 @@ class StoreSectionRequest extends BaseRequest {
      */
     public function rules(): array {
         $user = Auth::user();
+        
         $data = [
             'course_id' => ['required', 'integer', 'exists:courses,id'],
             'title.en' => ['nullable', 'string', 'min:4', 'max:125'],
             'title.ar' => ['nullable', 'string', 'min:4', 'max:125'],
-            'title' => ['required', 'array'],
-            'description' => ['required', 'array'],
+            'title' => ['required', 'array', new AtLeastOneLocale()],
+            'description' => ['required', 'array', new AtLeastOneLocale()],
             'description.en' => ['nullable', 'string', 'min:10', 'max:250'],
             'description.ar' => ['nullable', 'string', 'min:10', 'max:250'],
             'order' => [
@@ -47,16 +50,24 @@ class StoreSectionRequest extends BaseRequest {
                 'integer',
                 'min:1',
                 'max:100',
-                Rule::unique('sections')
-                    ->where(fn($q) => $q->where('course_id', $this->course_id))
+                Rule::unique('sections', 'order')
+                    ->where(
+                        fn($q) =>
+                        $q->where('course_id', $this->input('course_id'))
+                    )
             ],
             'slug' => ['nullable', 'string', 'unique:sections,slug'],
 
         ];
-        if ($user->hasRole(UserRoles::Admin->value)) {
+        $course = Course::findOrFail(($data['course_id']));
+        if (
+            $user->hasRole(UserRoles::Admin->value) ||
+            ($user->hasRole(UserRoles::Instructor->value)
+                && $course->is_published == true && $course->instructor->id === $user->id)
+        ) {
             $data['is_published'] = ['sometimes', 'boolean'];
         }
-   
+
         return $data;
     }
 

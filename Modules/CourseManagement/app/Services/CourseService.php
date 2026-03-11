@@ -24,7 +24,7 @@ class CourseService {
      * @param mixed $filters
      * @return string
      */
-    protected function makeKey($filters = [],$user) {
+    protected function makeKey($user,$filters=[]) {
         
         ksort($filters);
         $userKey = $user ? $user->id . '-' . $user->roles->pluck('id')->sort()->implode('-') : 'guest';
@@ -38,7 +38,7 @@ class CourseService {
      */
     public  function getAll(array $filters = []) {
         return Cache::tags([NameOfCache::Course->value])
-            ->remember($this->makeKey($filters,Auth::user()), now()->addMinutes(2), function () use ($filters) {
+            ->remember($this->makeKey(Auth::user(),$filters), now()->addMinutes(2), function () use ($filters) {
                 $courses = Course::query()->forVisibleCourse(Auth::user())->with(['instructor', 'category']);
                 return $this->applyFilters($courses, $filters);
             });

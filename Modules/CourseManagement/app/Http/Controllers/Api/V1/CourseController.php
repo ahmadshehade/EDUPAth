@@ -5,8 +5,8 @@ namespace Modules\CourseManagement\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Modules\CourseManagement\Http\Requests\Api\V1\Course\StoreCourseRequest;
-use Modules\CourseManagement\Http\Requests\Api\V1\Course\UpdateCourseRequest;
+use Modules\CourseManagement\Http\Requests\Api\V1\Courses\StoreCourseRequest;
+use Modules\CourseManagement\Http\Requests\Api\V1\Courses\UpdateCourseRequest;
 use Modules\CourseManagement\Models\Course;
 use Modules\CourseManagement\Services\CourseService;
 

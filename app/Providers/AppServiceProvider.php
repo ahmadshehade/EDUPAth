@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Enums\UserRoles;
 use Illuminate\Support\ServiceProvider;
-
+use Pion\Laravel\ChunkUpload\Config\AbstractConfig;
 use App\Interfaces\AuthInterface;
 use App\Models\User;
 use App\Services\Auth\AuthService;
@@ -29,6 +29,12 @@ class AppServiceProvider extends ServiceProvider {
             return $user->hasRole(UserRoles::Admin->value);
         });
         $this->configureRateLimiting();
+
+
+
+
+        
+
     }
 
     /**

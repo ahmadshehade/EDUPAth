@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Translatable\HasTranslations;
 
 // use Modules\CourseManagement\Database\Factories\SectionFactory;
@@ -88,5 +89,13 @@ class Section extends Model {
         } else {
             return $query->whereRaw('0=1');
         }
+    }
+
+    /**
+     * Summary of lessons
+     * @return HasMany<Lesson, Section>
+     */
+    public function lessons():HasMany{
+        return $this->hasMany(Lesson::class,'section_id');
     }
 }

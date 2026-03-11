@@ -67,6 +67,6 @@ class SectionController extends Controller {
     public function destroy(Section $section) {
         $this->authorize('delete', $section);
         $success = $this->sectionService->deleteSection($section);
-        return $this->successMessage('Successfully Delete Section', $success, 200);
+        return $this->successMessage('Successfully Delete Section', $success, 204);
     }
 }

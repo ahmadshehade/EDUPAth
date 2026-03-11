@@ -40,8 +40,8 @@ class SectionService {
     public function getAll(array  $data) {
         $user = Auth::user();
         return Cache::tags([NameOfCache::Section->value])
-            ->remember($this->generateCacheKey(Auth::user(), $data), now()->addMinute(), function () use ($data, $user) {
-                $setions = Section::query()->visibleForSection($user)->with('course.instructor');
+            ->remember($this->generateCacheKey($user, $data), now()->addMinute(), function () use ($data, $user) {
+                $setions = Section::query()->visibleForSection($user)->with('course.instructor')->orderBy('order', 'asc');
                 return $this->applyFilters($setions, $data);
             });
     }

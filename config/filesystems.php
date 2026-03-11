@@ -68,6 +68,12 @@ return [
             'throw' => false,
         ],
 
+        'ram' => [
+            'driver' => 'local',
+            'root' => '/mnt/ramdisk',
+            'visibility' => 'private',
+        ],
+
     ],
 
     /*

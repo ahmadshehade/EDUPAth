@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\CourseManagement\Http\Requests\Api\V1\Course;
+namespace Modules\CourseManagement\Http\Requests\Api\V1\Courses;
 
 use App\Enums\UserRoles;
 use App\Http\Requests\BaseRequest;

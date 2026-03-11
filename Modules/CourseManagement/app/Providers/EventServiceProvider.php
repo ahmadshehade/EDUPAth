@@ -5,8 +5,13 @@ namespace Modules\CourseManagement\Providers;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Modules\CourseManagement\Events\CreateCourseEvent;
 use Modules\CourseManagement\Events\UpdateCourseEvent;
+use Modules\CourseManagement\Events\UpdateLessonFilesEvent;
+use Modules\CourseManagement\Events\UploadAttachementEvent;
 use Modules\CourseManagement\Listeners\CreateCourseListener;
 use Modules\CourseManagement\Listeners\UpdateCourseListener;
+use Modules\CourseManagement\Listeners\UpdateLessonFilesListener;
+use Modules\CourseManagement\Listeners\UpdateLessonFilesListner;
+use Modules\CourseManagement\Listeners\UploadAttachementListener;
 
 class EventServiceProvider extends ServiceProvider {
 
@@ -21,6 +26,12 @@ class EventServiceProvider extends ServiceProvider {
         ],
         UpdateCourseEvent::class => [
             UpdateCourseListener::class
+        ],
+        UploadAttachementEvent::class=>[
+            UploadAttachementListener::class
+        ],
+        UpdateLessonFilesEvent::class=>[
+            UpdateLessonFilesListner::class
         ]
     ];
 

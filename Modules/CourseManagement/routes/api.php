@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\CourseManagement\Http\Controllers\Api\V1\CategoryController;
 use Modules\CourseManagement\Http\Controllers\Api\V1\CourseController;
+use Modules\CourseManagement\Http\Controllers\Api\V1\LessonController;
 use Modules\CourseManagement\Http\Controllers\Api\V1\SectionController;
 use Modules\CourseManagement\Http\Controllers\CourseManagementController;
 
@@ -11,7 +12,7 @@ Route::get('/test-speed', function () {
     return response()->json(['ok' => true]);
 });
 
-Route::middleware(['auth:sanctum','throttle:20,1'])->prefix('v1/courseManagement')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:20,1'])->prefix('v1/courseManagement')->group(function () {
 
 
 
@@ -46,17 +47,34 @@ Route::middleware(['auth:sanctum','throttle:20,1'])->prefix('v1/courseManagement
 
 
 
-        Route::prefix('/sections')->group(function(){
+    Route::prefix('/sections')->group(function () {
 
-            Route::get('/', [SectionController::class, 'index'])
-                ->name('sections.index');
-            Route::post('/', [SectionController::class, 'store'])
-                ->name('sections.store');
-            Route::get('/{section}', [SectionController::class, 'show'])
-                ->name('sections.show');
-            Route::post('/{section}', [SectionController::class, 'update'])
-                ->name('sections.update');
-            Route::delete('/{section}', [SectionController::class, 'destroy'])
-                ->name('sections.delete');
-        });
+        Route::get('/', [SectionController::class, 'index'])
+            ->name('sections.index');
+        Route::post('/', [SectionController::class, 'store'])
+            ->name('sections.store');
+        Route::get('/{section}', [SectionController::class, 'show'])
+            ->name('sections.show');
+        Route::post('/{section}', [SectionController::class, 'update'])
+            ->name('sections.update');
+        Route::delete('/{section}', [SectionController::class, 'destroy'])
+            ->name('sections.delete');
+    });
+
+
+    
+
+    Route::prefix('/lessons')->group(function () {
+
+        Route::get('/', [LessonController::class, 'index'])
+            ->name('lessons.index');
+        Route::post('/', [LessonController::class, 'store'])
+            ->name('lessons.store');
+        Route::get('/{lesson}', [LessonController::class, 'show'])
+            ->name('lessons.show');
+        Route::post('/{lesson}', [LessonController::class, 'update'])
+            ->name('lessons.update');
+        Route::delete('/{lesson}', [LessonController::class, 'destroy'])
+            ->name('lessons.delete');
+    });
 });
