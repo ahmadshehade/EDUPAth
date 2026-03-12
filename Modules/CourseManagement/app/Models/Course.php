@@ -123,5 +123,23 @@ class Course extends Model implements HasMedia {
         return $this->hasMany(Section::class,'course_id');
     }
 
+
+
+    /**
+     * Summary of students
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<User, Course, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
+    public  function students(){
+        return $this->belongsToMany(User::class,'enrollments');
+    }
+
+    /**
+     * Summary of enrollments
+     * @return HasMany<Enrollment, Course>
+     */
+    public  function enrollments(){
+        return  $this->hasMany(Enrollment::class,'course_id');
+    }
+
     
 }

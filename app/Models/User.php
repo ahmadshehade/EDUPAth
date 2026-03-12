@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\CourseManagement\Models\Course;
+use Modules\CourseManagement\Models\Enrollment;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Translatable\HasTranslations;
 
@@ -105,7 +106,23 @@ class User extends Authenticatable {
      * Summary of courses
      * @return HasMany<Course, User>
      */
-    public  function courses():HasMany{
-       return $this->hasMany(Course::class,'instructor_id');
+    public  function courses(): HasMany {
+        return $this->hasMany(Course::class, 'instructor_id');
+    }
+
+    /**
+     * Summary of enrolledCourses
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Course, User, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
+    public function enrolledCourses() {
+        return $this->belongsToMany(Course::class, 'enrollments');
+    }
+
+    /**
+     * Summary of enrollments
+     * @return HasMany<Enrollment, User>
+     */
+    public function enrollments() {
+        return $this->hasMany(Enrollment::class,'user_id');
     }
 }

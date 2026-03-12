@@ -59,7 +59,9 @@ class StoreSectionRequest extends BaseRequest {
             'slug' => ['nullable', 'string', 'unique:sections,slug'],
 
         ];
-        $course = Course::findOrFail(($data['course_id']));
+        
+        $course = Course::where('id',$this->input('course_id'))->firstOrFail();
+       
         if (
             $user->hasRole(UserRoles::Admin->value) ||
             ($user->hasRole(UserRoles::Instructor->value)

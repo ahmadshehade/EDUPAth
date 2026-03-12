@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\CourseManagement\Http\Controllers\Api\V1\CategoryController;
 use Modules\CourseManagement\Http\Controllers\Api\V1\CourseController;
+use Modules\CourseManagement\Http\Controllers\Api\V1\EnrollmentController;
 use Modules\CourseManagement\Http\Controllers\Api\V1\LessonController;
 use Modules\CourseManagement\Http\Controllers\Api\V1\SectionController;
 use Modules\CourseManagement\Http\Controllers\CourseManagementController;
@@ -62,7 +63,7 @@ Route::middleware(['auth:sanctum', 'throttle:20,1'])->prefix('v1/courseManagemen
     });
 
 
-    
+
 
     Route::prefix('/lessons')->group(function () {
 
@@ -76,5 +77,22 @@ Route::middleware(['auth:sanctum', 'throttle:20,1'])->prefix('v1/courseManagemen
             ->name('lessons.update');
         Route::delete('/{lesson}', [LessonController::class, 'destroy'])
             ->name('lessons.delete');
+    });
+
+
+    Route::prefix('/enrollments')->group(function () {
+        Route::get('/', [EnrollmentController::class, 'index'])
+            ->name('enrollments.index');
+        Route::post('/', [EnrollmentController::class, 'store'])
+            ->name('enrollments.store');
+        Route::get('/{enrollment}', [EnrollmentController::class, 'show'])
+            ->name('enrollments.show');
+        Route::put('/{enrollment}', [EnrollmentController::class, 'update'])
+            ->name('enrollments.update');
+        Route::delete('/{enrollment}', [EnrollmentController::class, 'destroy'])
+            ->name('enrollments.delete');
+
+        Route::post('/{enrollment}/lessons/{lesson}/complete', [EnrollmentController::class, 'markLessonComplete'])
+            ->name('enrollments.lessons.complete');
     });
 });

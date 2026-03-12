@@ -90,4 +90,12 @@ class Lesson extends Model implements HasMedia {
         $this->addMediaCollection('files');
         $this->addMediaCollection('assignments');
     }
+
+    /**
+     * Summary of lessonProgress
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<LessonProgress, Lesson>
+     */
+    public function lessonProgress() {
+        return $this->hasMany(LessonProgress::class);
+    }
 }
