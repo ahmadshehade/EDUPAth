@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Modules\CourseManagement\Events\CreateSectionEvent;
+use Modules\CourseManagement\Events\DeleteSectionEvent;
+use Modules\CourseManagement\Events\UpdateSectionEvent;
 use Modules\CourseManagement\Models\Course;
 use Modules\CourseManagement\Models\Section;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -62,6 +65,7 @@ class SectionService {
                 }
                 $section = Section::create($data);
                 Cache::tags([NameOfCache::Section->value])->flush();
+                event(new CreateSectionEvent($section, Auth::id()));
                 return $section->load(['course.instructor']);
             }, 5);
         } catch (Exception $e) {
@@ -100,6 +104,7 @@ class SectionService {
                 unset($data['slug']);
                 $section->update($data);
                 Cache::tags([NameOfCache::Section->value])->flush();
+                event(new UpdateSectionEvent(Auth::id(), $section));
                 return $section->load(['course.instructor']);
             }, 5);
         } catch (Exception  $e) {
@@ -114,7 +119,19 @@ class SectionService {
      */
     public function deleteSection(Section $section) {
         return DB::transaction(function () use ($section) {
+            $data = [
+                'teacher_id'   => $section->course->instructor_id,
+                'student_ids'  => $section->course->students()->pluck('users.id')->toArray(),
+                'title' => [
+                    'ar' => $section->getTranslation('title', 'ar'),
+                    'en' => $section->getTranslation('title', 'en'),
+                ],
+                'is_published' => $section->is_published,
+            ];
             $success = $section->delete();
+            if ($success) {
+                event(new DeleteSectionEvent($data, Auth::id()));
+            }
             Cache::tags([NameOfCache::Section->value])->flush();
             return $success;
         });

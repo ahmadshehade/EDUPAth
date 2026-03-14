@@ -65,7 +65,7 @@ class CoursePolicy {
      * @return bool
      */
     public  function update(User $user, Course $course) {
-        return UserRoles::Instructor->value && $course->user_id === $user->id;
+        return UserRoles::Instructor->value && $course->instructor_id === $user->id;
     }
 
     /**
@@ -75,6 +75,6 @@ class CoursePolicy {
      * @return bool
      */
     public function delete(User $user, Course $course) {
-        return UserRoles::Instructor->value && $course->user_id === $user->id;
+        return UserRoles::Instructor->value && $course->instructor_id === $user->id;
     }
 }

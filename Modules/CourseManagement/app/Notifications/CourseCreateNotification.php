@@ -2,11 +2,12 @@
 
 namespace Modules\CourseManagement\Notifications;
 
+use App\Notifications\BaseNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class CourseCreateNotification extends Notification {
+class CourseCreateNotification extends BaseNotification {
     use Queueable;
 
     protected $user_id;
@@ -32,7 +33,7 @@ class CourseCreateNotification extends Notification {
      * Get the mail representation of the notification.
      */
     public function toMail($notifiable): MailMessage {
-        $titleEn = $this->course->title['en'] ?? $this->course->title; // fallback
+        $titleEn = $this->course->title['en'] ?? $this->course->title;
         $titleAr = $this->course->title['ar'] ?? $this->course->title;
 
         return (new MailMessage)

@@ -11,7 +11,9 @@ class UpdateLessonFilesEvent
 
     public int $lessonId;
     public array $newPaths;     
-    public array $oldMediaIds;   
+    public array $oldMediaIds; 
+    
+    public  $afterCommit=true;
 
     public function __construct(int $lessonId, array $newPaths, array $oldMediaIds)
     {

@@ -13,6 +13,8 @@ class UploadAttachementEvent {
     public int $lessonId;
     public array $paths;
 
+    public  $afterCommit=true;
+
     public function __construct(int $lessonId, array $paths) {
         $this->lessonId = $lessonId;
         $this->paths = $paths;

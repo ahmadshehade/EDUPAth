@@ -7,11 +7,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-abstract class BaseNotification extends Notification implements ShouldQueue {
+abstract class BaseNotification extends Notification  {
     use Queueable;
 
-    protected array $data;
-    protected int $user_id;
+    protected  $data;
+    protected  $user_id;
 
     public function __construct(array $data, int $user_id) {
         $this->data = $data;

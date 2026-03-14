@@ -15,7 +15,7 @@ class CreateCourseEvent
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public  $course;
-
+    public $afterCommit=true;
     public $user_id;
     /**
      * Create a new event instance.

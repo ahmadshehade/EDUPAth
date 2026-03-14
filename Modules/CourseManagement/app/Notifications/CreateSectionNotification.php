@@ -4,20 +4,21 @@ namespace Modules\CourseManagement\Notifications;
 
 use App\Notifications\BaseNotification;
 use Illuminate\Bus\Queueable;
+
 use Illuminate\Notifications\Messages\MailMessage;
 
-class CourseUpdateNotification extends BaseNotification {
+class CreateSectionNotification extends BaseNotification {
     use Queueable;
 
     protected $user_id;
 
-    protected $course;
+    protected $section;
     /**
      * Create a new notification instance.
      */
-    public function __construct($course, $user_id) {
+    public function __construct($section, $user_id) {
         $this->user_id = $user_id;
-        $this->course = $course;
+        $this->section = $section;
     }
 
     /**
@@ -31,14 +32,13 @@ class CourseUpdateNotification extends BaseNotification {
      * Get the mail representation of the notification.
      */
     public function toMail($notifiable): MailMessage {
-        $titleEn = $this->course->title['en'] ?? $this->course->title; // fallback
-        $titleAr = $this->course->title['ar'] ?? $this->course->title;
-
+        $titleEn = $this->section->title['en'] ?? $this->section->title;
+        $titleAr = $this->section->title['ar'] ?? $this->section->title;
         return (new MailMessage)
-            ->line(' Update  Course')
-            ->line('Course Title (EN): ' . $titleEn)
-            ->line('عنوان الدورة (AR): ' . $titleAr)
-            ->line('Published: ' . ($this->course->is_published ? "True" : "False"))
+            ->line('Make New Section')
+            ->line('Section Title (EN): ' . $titleEn)
+            ->line('عنوان القسم (AR): ' . $titleAr)
+            ->line('Published: ' . ($this->section->is_published ? "True" : "False"))
             ->line('Thank you for using our application!');
     }
 
@@ -48,7 +48,7 @@ class CourseUpdateNotification extends BaseNotification {
     public function toArray($notifiable): array {
         return [
             'user_id' => $this->user_id,
-            'data' => $this->course,
+            'data' => $this->section,
             'type' => static::class,
         ];
     }

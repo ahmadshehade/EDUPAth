@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\CourseManagement\Events\CreateCourseEvent;
+use Modules\CourseManagement\Events\DeleteCourseEvent;
 use Modules\CourseManagement\Events\UpdateCourseEvent;
 use Modules\CourseManagement\Models\Course;
 
@@ -24,11 +25,11 @@ class CourseService {
      * @param mixed $filters
      * @return string
      */
-    protected function makeKey($user,$filters=[]) {
-        
+    protected function makeKey($user, $filters = []) {
+
         ksort($filters);
         $userKey = $user ? $user->id . '-' . $user->roles->pluck('id')->sort()->implode('-') : 'guest';
-        return NameOfCache::Course->value.$userKey . md5(json_encode($filters));
+        return NameOfCache::Course->value . $userKey . md5(json_encode($filters));
     }
 
     /**
@@ -38,7 +39,7 @@ class CourseService {
      */
     public  function getAll(array $filters = []) {
         return Cache::tags([NameOfCache::Course->value])
-            ->remember($this->makeKey(Auth::user(),$filters), now()->addMinutes(2), function () use ($filters) {
+            ->remember($this->makeKey(Auth::user(), $filters), now()->addMinutes(2), function () use ($filters) {
                 $courses = Course::query()->forVisibleCourse(Auth::user())->with(['instructor', 'category']);
                 return $this->applyFilters($courses, $filters);
             });
@@ -93,7 +94,7 @@ class CourseService {
                     }
                 }
             }
-            event(new UpdateCourseEvent($model,Auth::user()->id));
+            event(new UpdateCourseEvent($model, Auth::user()->id));
             Cache::tags([NameOfCache::Course->value])->flush();
             return $model->load(['instructor', 'category']);
         }, 5);
@@ -108,7 +109,20 @@ class CourseService {
             if ($model->hasMedia('course')) {
                 $model->clearMediaCollection('course');
             }
+
+            $data = [
+                'teacherId' => $model->instructor->id,
+                'students' => $model->students()->pluck('users.id')->toArray(),
+                'title' => [
+                    'ar' => $model->getTranslation('title', 'ar'),
+                    'en' => $model->getTranslation('title', 'en'),
+                ],
+                'is_published' => $model->is_published
+            ];
             $success = $model->delete();
+            if ($success) {
+                event(new DeleteCourseEvent($data, Auth::id()));
+            }
             Cache::tags([NameOfCache::Course->value])->flush();
             return $success;
         }, 5);

@@ -4,20 +4,26 @@ namespace Modules\CourseManagement\Notifications;
 
 use App\Notifications\BaseNotification;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class CourseUpdateNotification extends BaseNotification {
+class DeleteCourseNotification extends BaseNotification {
     use Queueable;
 
-    protected $user_id;
+    public  $user_id;
 
-    protected $course;
+    public $data;
+
     /**
-     * Create a new notification instance.
+     * Summary of __construct
+     * @param mixed $user_id
+     * @param mixed $data
      */
-    public function __construct($course, $user_id) {
+    public function __construct($user_id, $data) {
+
         $this->user_id = $user_id;
-        $this->course = $course;
+        $this->data = $data;
     }
 
     /**
@@ -31,14 +37,14 @@ class CourseUpdateNotification extends BaseNotification {
      * Get the mail representation of the notification.
      */
     public function toMail($notifiable): MailMessage {
-        $titleEn = $this->course->title['en'] ?? $this->course->title; // fallback
-        $titleAr = $this->course->title['ar'] ?? $this->course->title;
-
+        $titleAr = $this->data['title']['ar'] ?? null;
+        $titleEn = $this->data['title']['en'] ?? null;
         return (new MailMessage)
-            ->line(' Update  Course')
+            ->subject('Course Deleted')
+            ->line('A course has been deleted from the platform.')
             ->line('Course Title (EN): ' . $titleEn)
             ->line('عنوان الدورة (AR): ' . $titleAr)
-            ->line('Published: ' . ($this->course->is_published ? "True" : "False"))
+            ->line('Published: ' . ($this->data['is_published'] ? "True" : "False"))
             ->line('Thank you for using our application!');
     }
 
@@ -48,8 +54,8 @@ class CourseUpdateNotification extends BaseNotification {
     public function toArray($notifiable): array {
         return [
             'user_id' => $this->user_id,
-            'data' => $this->course,
-            'type' => static::class,
+            'course' => $this->data,
+            'type' => static::class
         ];
     }
 }

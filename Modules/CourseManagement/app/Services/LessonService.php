@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Modules\CourseManagement\Events\CreateLessonEvent;
+use Modules\CourseManagement\Events\DeleteLessonEvent;
+use Modules\CourseManagement\Events\UpdateLessonEvent;
 use Modules\CourseManagement\Events\UpdateLessonFilesEvent;
 use Modules\CourseManagement\Events\UploadAttachementEvent;
 use Modules\CourseManagement\Models\Lesson;
@@ -109,6 +112,7 @@ class LessonService {
 
             DB::afterCommit(function () use ($lesson, $paths) {
                 event(new UploadAttachementEvent($lesson->id, $paths));
+                event(new CreateLessonEvent($lesson, Auth::id()));
             });
 
             Cache::tags([NameOfCache::Lesson->value])->flush();
@@ -183,6 +187,8 @@ class LessonService {
                             $newPaths,
                             $oldMediaIds
                         ));
+
+                        event(new UpdateLessonEvent($lesson, Auth::id()));
                     }
                 });
                 Cache::tags([NameOfCache::Lesson->value])->flush();
@@ -203,14 +209,22 @@ class LessonService {
     public  function destroyLesson(Lesson $lesson) {
         return DB::transaction(
             function () use ($lesson) {
+                $data = [
+                    'teacherId' => $lesson->section->course->instructor->id,
+                    'studentsId' => $lesson->section->course->students()->pluck('users.id')->toArray(),
+                    'title' => [
+                        'ar' => $lesson->getTranslation('title', 'ar'),  
+                        'en' => $lesson->getTranslation('title', 'en'),
+                    ],
+                    'order' => $lesson->order
+
+                ];
                 $success = $lesson->delete();
+                event(new DeleteLessonEvent($data, Auth::id()));
                 Cache::tags([NameOfCache::Lesson->value])->flush();
                 return $success;
             },
             5
         );
     }
-
-
-    
 }

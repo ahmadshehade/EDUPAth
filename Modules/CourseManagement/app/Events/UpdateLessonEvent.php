@@ -10,20 +10,21 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UpdateCourseEvent
+class UpdateLessonEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $course;
-    public $afterCommit=true;
     public $user_id;
+    
+    public $afterCommit=true;
+    public $lesson;
     /**
      * Create a new event instance.
      */
-    public function __construct( $course,$user_id) {
+    public function __construct($lesson,$user_id) {
         $this->user_id=$user_id;
-        $this->course=$course;
+        $this->lesson=$lesson;
     }
 
-    
+ 
 }
