@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             AssignRolesToUsers::class,
             StudentTableSeeder::class,
             InstructorTableSeeder::class,
+            SubscriptionPlanSeeder::class
         ]);
     }
 }

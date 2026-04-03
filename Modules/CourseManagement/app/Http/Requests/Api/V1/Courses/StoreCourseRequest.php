@@ -73,7 +73,7 @@ class StoreCourseRequest extends BaseRequest {
             'level.ar' => ['required', 'string', 'min:2', 'max:50'],
         ];
 
-        if (Auth::user()?->hasRole(UserRoles::Admin->value)) {
+        if ($this->user()?->hasRole(UserRoles::Admin->value)) {
             $data['is_published'] = ['sometimes', 'boolean'];
         }
 

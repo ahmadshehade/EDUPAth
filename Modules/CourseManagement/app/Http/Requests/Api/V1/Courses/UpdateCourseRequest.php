@@ -77,7 +77,7 @@ class UpdateCourseRequest extends BaseRequest {
             'category_id' => ['sometimes', 'integer', 'exists:categories,id'],
         ];
 
-        if (Auth::user()?->hasRole(UserRoles::Admin->value)) {
+        if ($this->user()?->hasRole(UserRoles::Admin->value)) {
             $data['is_published'] = ['sometimes', 'boolean'];
         }
 

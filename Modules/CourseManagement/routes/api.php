@@ -9,9 +9,6 @@ use Modules\CourseManagement\Http\Controllers\Api\V1\SectionController;
 use Modules\CourseManagement\Http\Controllers\CourseManagementController;
 
 
-Route::get('/test-speed', function () {
-    return response()->json(['ok' => true]);
-});
 
 Route::middleware(['auth:sanctum', 'throttle:20,1'])->prefix('v1/courseManagement')->group(function () {
 

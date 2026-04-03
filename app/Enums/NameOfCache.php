@@ -13,5 +13,8 @@ enum NameOfCache: string {
     case Section = "section_all";
     case Lesson = 'lesson_all';
 
-    case Enrollment='enrollment_all';
+    case Enrollment = 'enrollment_all';
+
+    case SubscriptionPlan = "subscription_plan_all";
+    case Subscription = 'Subscription_all';
 }

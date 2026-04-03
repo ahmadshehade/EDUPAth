@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Subscription\Models\SubscriptionPlan;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -119,8 +120,8 @@ class Course extends Model implements HasMedia {
      * Summary of sections
      * @return HasMany<Section, Course>
      */
-    public function sections():HasMany{
-        return $this->hasMany(Section::class,'course_id');
+    public function sections(): HasMany {
+        return $this->hasMany(Section::class, 'course_id');
     }
 
 
@@ -129,17 +130,24 @@ class Course extends Model implements HasMedia {
      * Summary of students
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<User, Course, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
-    public  function students(){
-        return $this->belongsToMany(User::class,'enrollments');
+    public  function students() {
+        return $this->belongsToMany(User::class, 'enrollments');
     }
 
     /**
      * Summary of enrollments
      * @return HasMany<Enrollment, Course>
      */
-    public  function enrollments(){
-        return  $this->hasMany(Enrollment::class,'course_id');
+    public  function enrollments() {
+        return  $this->hasMany(Enrollment::class, 'course_id');
     }
 
-    
+
+    /**
+     * Summary of subscriptionPlans
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<SubscriptionPlan, Course, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
+    public function subscriptionPlans() {
+        return $this->belongsToMany(SubscriptionPlan::class, 'course_subscription_plan');
+    }
 }
