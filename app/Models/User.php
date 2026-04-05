@@ -132,6 +132,6 @@ class User extends Authenticatable {
      * @return HasMany<Subscription, User>
      */
     public function subscriptions():HasMany{
-        return $this->hasMany(Subscription::class,'plan_id');
+        return $this->hasMany(Subscription::class,'user_id');
     }
 }

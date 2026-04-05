@@ -3,13 +3,19 @@
 namespace Modules\Subscription\Services;
 
 use App\Enums\NameOfCache;
+use App\Models\User;
 use App\Traits\FilterableServiceTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Modules\Subscription\Events\DeleteSubscriptionPlanEvent;
+use Modules\Subscription\Events\SubscriptionPlanCreatedEvent;
+use Modules\Subscription\Events\UpdateSubscriptionPlanEvent;
 use Modules\Subscription\Models\SubscriptionPlan;
 
-class SubscriptionPlanService {
+class SubscriptionPlanService
+{
 
     use FilterableServiceTrait;
 
@@ -18,7 +24,8 @@ class SubscriptionPlanService {
      * @param mixed $filters
      * @return string
      */
-    public  function generateKey($filters) {
+    public  function generateKey($filters)
+    {
         ksort($filters);
         $user = Auth::user();
         $userKey = $user ? $user->id . "_" . implode($user->roles->pluck('name')->toArray()) : "guest";
@@ -31,7 +38,8 @@ class SubscriptionPlanService {
      * @param array $filters
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Collection
      */
-    public  function getAll(array $filters) {
+    public  function getAll(array $filters)
+    {
         return Cache::tags([NameOfCache::SubscriptionPlan->value])
             ->remember($this->generateKey($filters), now()->addMinutes(2), function () use ($filters) {
                 $plans = SubscriptionPlan::query()->orderBy('id', 'desc');
@@ -44,13 +52,17 @@ class SubscriptionPlanService {
      * @param array $data
      * @return SubscriptionPlan
      */
-    public  function store(array $data) {
+    public  function store(array $data)
+    {
         return DB::transaction(function () use ($data) {
             $plan = SubscriptionPlan::create($data);
-            if(!empty($data['course_ids'])){
+            if (!empty($data['course_ids'])) {
                 $plan->courses()->sync($data['course_ids']);
             }
             Cache::tags([NameOfCache::SubscriptionPlan->value])->flush();
+            DB::afterCommit(function () use ($plan, $data) {
+                event(new SubscriptionPlanCreatedEvent(Auth::id(), $plan));
+            });
             return $plan;
         }, 5);
     }
@@ -60,7 +72,8 @@ class SubscriptionPlanService {
      * @param SubscriptionPlan $plan
      * @return SubscriptionPlan
      */
-    public  function getPlan(SubscriptionPlan $plan) {
+    public  function getPlan(SubscriptionPlan $plan)
+    {
         return $plan;
     }
 
@@ -69,13 +82,17 @@ class SubscriptionPlanService {
      * @param SubscriptionPlan $plan
      * @param array $data
      */
-    public function update(SubscriptionPlan $plan, array $data) {
+    public function update(SubscriptionPlan $plan, array $data)
+    {
         return  DB::transaction(function () use ($data, $plan) {
             $plan->update($data);
-            if(isset($data['course_ids'])){
+            if (isset($data['course_ids'])) {
                 $plan->courses()->sync($data['course_ids']);
             }
             Cache::tags([NameOfCache::SubscriptionPlan->value])->flush();
+            DB::afterCommit(function () use ($plan) {
+                event(new UpdateSubscriptionPlanEvent(Auth::id(), $plan));
+            });
             return $plan;
         }, 5);
     }
@@ -84,10 +101,25 @@ class SubscriptionPlanService {
      * Summary of destroy
      * @param SubscriptionPlan $plan
      */
-    public  function destroy(SubscriptionPlan $plan) {
+    public  function destroy(SubscriptionPlan $plan)
+    {
         return   DB::transaction(function () use ($plan) {
+            $students = User::whereHas('subscriptions', function ($query) use ($plan) {
+                $query->where('plan_id', $plan->id);
+            })->get();
+            $data = [
+                'user_id' => Auth::id(),
+                'plan_id' => $plan->id,
+                'name' => $plan->name,
+                'price' => $plan->price,
+                'interval' => $plan->interval,
+                'students' => $students
+            ];
             $success = $plan->delete();
             Cache::tags([NameOfCache::SubscriptionPlan->value])->flush();
+            DB::afterCommit(function () use ($data) {
+                event(new DeleteSubscriptionPlanEvent(Auth::id(), $data));
+            });
             return $success;
         }, 5);
     }

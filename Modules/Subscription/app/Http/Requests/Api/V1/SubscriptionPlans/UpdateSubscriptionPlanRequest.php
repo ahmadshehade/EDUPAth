@@ -36,7 +36,7 @@ class UpdateSubscriptionPlanRequest extends BaseRequest {
 
             'is_active' => ['sometimes', 'boolean'],
             'course_ids' => ['sometimes', 'array'],
-            ['course_ids.*'] => ['integer', 'exists:courses,id'],
+            'course_ids.*' => ['integer', 'exists:courses,id'],
         ];
 
         if ($this->has('interval')) {
