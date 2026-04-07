@@ -5,16 +5,16 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Modules\Subscription\Models\SubscriptionPlan;
+use Modules\Payments\Models\PaymentMethod;
 
-class SubscriptionPlanSeeder extends Seeder
+class PaymentMethodSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        DB::table("subscription_plans")->delete();
-        SubscriptionPlan::factory(10)->create();
+        DB::table("payment_methods")->delete();
+        PaymentMethod::factory(10)->create();
     }
 }

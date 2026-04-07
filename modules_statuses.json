@@ -1,4 +1,5 @@
 {
     "CourseManagement": true,
-    "Subscription": true
+    "Subscription": true,
+    "Payments": true
 }
