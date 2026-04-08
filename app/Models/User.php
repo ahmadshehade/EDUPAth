@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\CourseManagement\Models\Course;
 use Modules\CourseManagement\Models\Enrollment;
+use Modules\Payments\Models\Invoice;
 use Modules\Subscription\Models\Subscription;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Translatable\HasTranslations;
@@ -133,5 +134,13 @@ class User extends Authenticatable {
      */
     public function subscriptions():HasMany{
         return $this->hasMany(Subscription::class,'user_id');
+    }
+
+    /**
+     * Summary of invoices
+     * @return HasMany<Invoice, User>
+     */
+    public  function invoices():HasMany{
+        return $this->hasMany(Invoice::class,'user_id');
     }
 }

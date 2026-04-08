@@ -9,10 +9,13 @@ use Database\Factories\SubscriptionFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Payments\Models\Invoice;
 
 // use Modules\Subscription\Database\Factories\SubscriptionFactory;
 
-class Subscription extends Model {
+class Subscription extends Model
+{
     use HasFactory;
 
     protected $table = 'subscriptions';
@@ -31,7 +34,8 @@ class Subscription extends Model {
      * Summary of user
      * @return BelongsTo<User, Subscription>
      */
-    public function user(): BelongsTo {
+    public function user(): BelongsTo
+    {
         return $this->belongsTo(User::class, 'user_id');
     }
 
@@ -39,7 +43,8 @@ class Subscription extends Model {
      * Summary of plan
      * @return BelongsTo<SubscriptionPlan, Subscription>
      */
-    public function plan(): BelongsTo {
+    public function plan(): BelongsTo
+    {
         return $this->belongsTo(SubscriptionPlan::class, 'plan_id');
     }
 
@@ -48,7 +53,8 @@ class Subscription extends Model {
      * @param mixed $user
      * @param mixed $query
      */
-    public function scopeFilterable($query, $user) {
+    public function scopeFilterable($query, $user)
+    {
         if ($user->hasRole(UserRoles::Admin->value)) {
             return $query;
         }
@@ -56,5 +62,14 @@ class Subscription extends Model {
             return $query->where('user_id', $user->id);
         }
         return $query->whereRaw('0=1');
+    }
+
+    /**
+     * Summary of invoices
+     * @return HasMany<Invoice, Subscription>
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'subscription_id');
     }
 }

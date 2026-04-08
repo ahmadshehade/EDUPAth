@@ -5,6 +5,8 @@ namespace Modules\Payments\Models;
 use Database\Factories\PaymentMethodFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 // use Modules\Payments\Database\Factories\PaymentMethodFactory;
 
 class PaymentMethod extends Model
@@ -32,5 +34,14 @@ class PaymentMethod extends Model
     protected static function newFactory()
     {
         return PaymentMethodFactory::new();
+    }
+
+    /**
+     * Summary of invoices
+     * @return HasMany<Invoice, PaymentMethod>
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'payment_method_id');
     }
 }

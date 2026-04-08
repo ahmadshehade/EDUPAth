@@ -8,6 +8,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Payments\Models\Invoice;
+
 // use Modules\CourseManagement\Database\Factories\EnrollmentFactory;
 
 class Enrollment extends Model {
@@ -70,5 +73,14 @@ class Enrollment extends Model {
             return $query->where('user_id', $user->id);
         }
         return $query->whereRaw('1 = 0');
+    }
+
+
+    /**
+     * Summary of invoices
+     * @return HasMany<Invoice, Enrollment>
+     */
+    public function invoices():HasMany{
+        return $this->hasMany(Invoice::class,'enrollment_id');
     }
 }
