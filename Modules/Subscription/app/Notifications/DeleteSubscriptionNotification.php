@@ -42,7 +42,7 @@ class DeleteSubscriptionNotification extends BaseNotification
             ->line('A subscription has been cancelled successfully.')
             ->line('Here are the details of the cancelled subscription:')
             ->line('Plan Name: ' . $data['plan'])
-            ->line('End Date: ' . $data['ends_at'])
+            ->line('End Date: ' . $data['ends_date'])
             ->action('View Subscriptions', url('/subscriptions'))
             ->line('If this action was not intended, please contact support immediately.')
             ->line('Thank you for using our platform.');

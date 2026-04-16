@@ -2,12 +2,14 @@
 
 namespace Modules\Subscription\Policies;
 
+use App\Enums\SubscriptionStatus;
 use App\Enums\UserRoles;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Modules\Subscription\Models\Subscription;
 
-class SubscriptionPolicy {
+class SubscriptionPolicy
+{
 
 
     use HandlesAuthorization;
@@ -17,7 +19,8 @@ class SubscriptionPolicy {
      * @param User $user
      * @return bool|null
      */
-    public  function before(User $user) {
+    public  function before(User $user)
+    {
         if ($user->hasRole(UserRoles::Admin->value)) {
             return true;
         }
@@ -29,7 +32,8 @@ class SubscriptionPolicy {
      * @param User $user
      * @return void
      */
-    public function viewAny(User $user) {
+    public function viewAny(User $user)
+    {
         $user->hasAnyRole([
             UserRoles::Student->value
         ]);
@@ -41,7 +45,8 @@ class SubscriptionPolicy {
      * @param Subscription $subscription
      * @return bool
      */
-    public function  view(User $user, Subscription $subscription) {
+    public function  view(User $user, Subscription $subscription)
+    {
         return $user->hasRole(UserRoles::Student->value) &&
             $user->id === $subscription->user_id;
     }
@@ -51,7 +56,8 @@ class SubscriptionPolicy {
      * @param User $user
      * @return bool
      */
-    public function create(User $user) {
+    public function create(User $user)
+    {
         return $user->hasRole(UserRoles::Student->value);
     }
 
@@ -61,9 +67,11 @@ class SubscriptionPolicy {
      * @param Subscription $subscription
      * @return bool
      */
-    public function update(User $user, Subscription $subscription) {
-        return $user->hasRole(UserRoles::Student->value) && 
-        $user->id === $subscription->user_id;
+    public function update(User $user, Subscription $subscription)
+    {
+        return $user->hasRole(UserRoles::Student->value) &&
+            ($user->id === $subscription->user_id)
+            && ($subscription->status = SubscriptionStatus::Pending->value);
     }
 
     /**
@@ -72,8 +80,10 @@ class SubscriptionPolicy {
      * @param Subscription $subscription
      * @return bool
      */
-    public  function delete(User $user, Subscription $subscription) {
-        return $user->hasRole(UserRoles::Student->value) && 
-        $user->id === $subscription->user_id;
+    public  function delete(User $user, Subscription $subscription)
+    {
+        return $user->hasRole(UserRoles::Student->value) &&
+            ($user->id === $subscription->user_id) &&
+            ($subscription->status = SubscriptionStatus::Pending->value);
     }
 }

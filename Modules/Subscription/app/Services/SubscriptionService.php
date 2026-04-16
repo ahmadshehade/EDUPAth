@@ -8,6 +8,7 @@ use App\Traits\FilterableServiceTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Modules\Payments\Services\InvoiceService;
 use Modules\Subscription\Events\CreateSubscriptionEvent;
 use Modules\Subscription\Events\DeleteSubscriptionEvent;
 use Modules\Subscription\Events\UpdateSubscriptionEvent;
@@ -70,6 +71,7 @@ class SubscriptionService
             $data['status'] = $data['status'] ?? SubscriptionStatus::Pending->value;
             $subscription =  Subscription::create($data);
             Cache::tags([NameOfCache::Subscription->value])->flush();
+            app(InvoiceService::class)->storeInvoiceForSubscription($subscription, $data);
             DB::afterCommit(function () use ($subscription, $data) {
                 event(new CreateSubscriptionEvent($data['user_id'], $subscription));
             });
@@ -126,11 +128,13 @@ class SubscriptionService
     public function destroy(Subscription $subscription)
     {
         return DB::transaction(function () use ($subscription) {
+
             $data = [
                 'user_id' => $subscription->user->id,
                 'ends_date' => $subscription->ends_date,
                 'plan' => $subscription->plan->name,
             ];
+            app(InvoiceService::class)->cansleInvoiceForSubscription($subscription);
             $success = $subscription->delete();
             Cache::tags([NameOfCache::Subscription->value])->flush();
             DB::afterCommit(function () use ($data) {

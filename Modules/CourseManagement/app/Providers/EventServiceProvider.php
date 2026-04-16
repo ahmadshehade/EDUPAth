@@ -4,30 +4,36 @@ namespace Modules\CourseManagement\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Modules\CourseManagement\Events\CreateCourseEvent;
+use Modules\CourseManagement\Events\CreateEnrollmentEvent;
 use Modules\CourseManagement\Events\CreateLessonEvent;
 use Modules\CourseManagement\Events\CreateSectionEvent;
 use Modules\CourseManagement\Events\DeleteCourseEvent;
+use Modules\CourseManagement\Events\DeleteEnrollmentEvent;
 use Modules\CourseManagement\Events\DeleteLessonEvent;
 use Modules\CourseManagement\Events\DeleteSectionEvent;
 use Modules\CourseManagement\Events\UpdateCourseEvent;
+use Modules\CourseManagement\Events\UpdateEnrollmentEvent;
 use Modules\CourseManagement\Events\UpdateLessonEvent;
 use Modules\CourseManagement\Events\UpdateLessonFilesEvent;
 use Modules\CourseManagement\Events\UpdateSectionEvent;
 use Modules\CourseManagement\Events\UploadAttachementEvent;
 use Modules\CourseManagement\Listeners\CreateCourseListener;
+use Modules\CourseManagement\Listeners\CreateEnrollmentListener;
 use Modules\CourseManagement\Listeners\CreateLessonListener;
 use Modules\CourseManagement\Listeners\CreateSectionlistener;
 use Modules\CourseManagement\Listeners\DeleteCourseListener;
+use Modules\CourseManagement\Listeners\DeleteEnrollmentListener;
 use Modules\CourseManagement\Listeners\DeleteLessonListener;
 use Modules\CourseManagement\Listeners\DeleteSectionListener;
 use Modules\CourseManagement\Listeners\UpdateCourseListener;
-use Modules\CourseManagement\Listeners\UpdateLessonFilesListener;
+use Modules\CourseManagement\Listeners\UpdateEnrollmentListener;
 use Modules\CourseManagement\Listeners\UpdateLessonFilesListner;
 use Modules\CourseManagement\Listeners\UpdateLessonListener;
 use Modules\CourseManagement\Listeners\UpdateSectionlistener;
 use Modules\CourseManagement\Listeners\UploadAttachementListener;
 
-class EventServiceProvider extends ServiceProvider {
+class EventServiceProvider extends ServiceProvider
+{
 
     /**
      * The event handler mappings for the application.
@@ -68,6 +74,15 @@ class EventServiceProvider extends ServiceProvider {
         DeleteLessonEvent::class => [
             DeleteLessonListener::class
         ],
+        CreateEnrollmentEvent::class => [
+            CreateEnrollmentListener::class
+        ],
+        UpdateEnrollmentEvent::class => [
+            UpdateEnrollmentListener::class
+        ],
+        DeleteEnrollmentEvent::class => [
+            DeleteEnrollmentListener::class,
+        ],
     ];
 
     /**
@@ -80,6 +95,5 @@ class EventServiceProvider extends ServiceProvider {
     /**
      * Configure the proper event listeners for email verification.
      */
-    protected function configureEmailVerification(): void {
-    }
+    protected function configureEmailVerification(): void {}
 }

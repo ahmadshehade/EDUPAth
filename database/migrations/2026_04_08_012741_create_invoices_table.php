@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('enrollment_id')->nullable()->constrained('enrollments')->onDelete('cascade');
-            $table->foreignId('subscription_id')->nullable()->constrained('subscriptions')->onDelete('cascade');
+            $table->foreignId('enrollment_id')->nullable()->constrained('enrollments')->nullOnDelete();
+            $table->foreignId('subscription_id')->nullable()->constrained('subscriptions')->nullOnDelete();
             $table->foreignId('payment_method_id')->constrained('payment_methods')->onDelete('cascade');
 
             $table->string('invoice_number')->unique();
@@ -31,19 +31,12 @@ return new class extends Migration
             $table->timestamp('issued_at')->useCurrent();
             $table->timestamp('paid_at')->nullable();
             $table->json('metadata')->nullable();
-
+            $table->softDeletes();
             $table->timestamps();
         });
 
 
-        DB::statement("
-    ALTER TABLE invoices
-    ADD CONSTRAINT check_invoice_type
-    CHECK (
-        (enrollment_id IS NOT NULL AND subscription_id IS NULL) OR
-        (enrollment_id IS NULL AND subscription_id IS NOT NULL)
-    )
-");
+
     }
 
     /**

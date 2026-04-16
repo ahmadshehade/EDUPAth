@@ -8,20 +8,32 @@ use App\Traits\FilterableServiceTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Modules\CourseManagement\Events\CreateEnrollmentEvent;
+use Modules\CourseManagement\Events\DeleteEnrollmentEvent;
+use Modules\CourseManagement\Events\UpdateEnrollmentEvent;
 use Modules\CourseManagement\Models\Enrollment;
 use Modules\CourseManagement\Models\Lesson;
 use Modules\CourseManagement\Models\LessonProgress;
+use Modules\Payments\Services\InvoiceService;
 
-class EnrollmentService {
+class EnrollmentService
+{
 
     use FilterableServiceTrait;
+
+    protected ?int $userId;
+    public function __construct()
+    {
+        $this->userId = Auth::id();
+    }
     /**
      * Summary of generateCacheKey
      * @param mixed $user
      * @param mixed $filters
      * @return string
      */
-    public function generateCacheKey($user, $filters) {
+    public function generateCacheKey($user, $filters)
+    {
         ksort($filters);
         $userKey = $user
             ? $user->id . '_' . md5(json_encode($user->roles->pluck('name')))
@@ -36,7 +48,8 @@ class EnrollmentService {
      * @param array $filters
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Collection
      */
-    public function getAll(array $filters = []) {
+    public function getAll(array $filters = [])
+    {
         $user = Auth::user();
         return Cache::tags([NameOfCache::Enrollment->value])->remember($this->generateCacheKey($user, $filters), now()->addMinutes(5), function () use ($user, $filters) {
             $enrollments = Enrollment::query()->visibleToUser($user)->with(['user', 'course']);
@@ -48,7 +61,8 @@ class EnrollmentService {
      * Summary of makeEnrollment
      * @param array $data
      */
-    public function makeEnrollment(array $data) {
+    public function makeEnrollment(array $data)
+    {
         return DB::transaction(function () use ($data) {
             $data['user_id'] = Auth::id();
             $data['enrolled_at'] = now();
@@ -56,6 +70,10 @@ class EnrollmentService {
             $data['status'] = EnrollmentStatus::Active->value;
             $data['last_accessed_at'] = now();
             $enrollment = Enrollment::create($data);
+            app(InvoiceService::class)->storeFromEnrollment($enrollment, $data);
+            DB::afterCommit(function () use ($enrollment, $data) {
+                event(new CreateEnrollmentEvent($this->userId, $enrollment));
+            });
             Cache::tags([NameOfCache::Enrollment->value])->flush();
             return $enrollment->load(['user', 'course']);
         }, 5);
@@ -66,7 +84,8 @@ class EnrollmentService {
      * @param Enrollment $enrollment
      * @return Enrollment
      */
-    public function getEnrollment(Enrollment  $enrollment) {
+    public function getEnrollment(Enrollment  $enrollment)
+    {
         return $enrollment->load(['user', 'course']);
     }
 
@@ -75,10 +94,16 @@ class EnrollmentService {
      * @param Enrollment $enrollment
      * @param array $data
      */
-    public  function update(Enrollment $enrollment, array $data) {
+    public  function update(Enrollment $enrollment, array $data)
+    {
         return DB::transaction(function () use ($enrollment, $data) {
             $data['last_accessed_at'] = now();
             $enrollment->update($data);
+            app(InvoiceService::class)->updateInvoiceForInrollment($enrollment, $data);
+
+            DB::afterCommit(function () use ($enrollment, $data) {
+                event(new UpdateEnrollmentEvent($this->userId, $enrollment));
+            });
             Cache::tags([NameOfCache::Enrollment->value])->flush();
             return $enrollment->load(['user', 'course']);
         }, 5);
@@ -88,9 +113,20 @@ class EnrollmentService {
      * Summary of deleteEnrollment
      * @param Enrollment $enrollment
      */
-    public  function deleteEnrollment(Enrollment $enrollment) {
+    public  function deleteEnrollment(Enrollment $enrollment)
+    {
         return DB::transaction(function () use ($enrollment) {
+            app(InvoiceService::class)->cansleInvoiceForEnrollment($enrollment);
+            $data = [
+                'enrollment' => $enrollment,
+                'user'       => $enrollment->user,
+                'course'     => $enrollment->course,
+                'progress'   => $enrollment->lessonProgress,
+            ];
             $success = $enrollment->delete();
+            DB::afterCommit(function () use ($data) {
+                event(new  DeleteEnrollmentEvent($this->userId, $data));
+            });
             Cache::tags([NameOfCache::Enrollment->value])->flush();
             return $success;
         }, 5);
@@ -102,7 +138,8 @@ class EnrollmentService {
      * @param Enrollment $enrollment
      * @return void
      */
-    public function recalculateProgress(Enrollment $enrollment) {
+    public function recalculateProgress(Enrollment $enrollment)
+    {
         $totalLessons = $enrollment->course
             ->sections()
             ->withCount('lessons')
@@ -126,7 +163,8 @@ class EnrollmentService {
      * @param Enrollment $enrollment
      * @param Lesson $lesson
      */
-    public function markLessonComplete(Enrollment  $enrollment, Lesson $lesson) {
+    public function markLessonComplete(Enrollment  $enrollment, Lesson $lesson)
+    {
         return DB::transaction(function () use ($enrollment, $lesson) {
             LessonProgress::updateOrCreate(
                 [
@@ -141,8 +179,8 @@ class EnrollmentService {
             if ($enrollment->progress == 100) {
                 $enrollment->completed_at = now();
                 $enrollment->save();
-            }else{
-                   $enrollment->completed_at = null;
+            } else {
+                $enrollment->completed_at = null;
                 $enrollment->save();
             }
             Cache::tags([NameOfCache::Lesson->value, NameOfCache::Enrollment->value])->flush();
