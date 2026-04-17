@@ -2,6 +2,7 @@
 
 namespace Modules\Payments\Models;
 
+use App\Enums\UserRoles;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,7 @@ use Modules\Subscription\Models\Subscription;
 
 class Invoice extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -72,6 +73,24 @@ class Invoice extends Model
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+    }
+
+    /**
+     * Summary of scopeVisibleFor
+     * @param mixed $query
+     * @param mixed $user
+     */
+    public function scopeVisibleFor($query, $user)
+    {
+        if ($user->hasRole(UserRoles::Admin->value)) {
+            return $query;
+        }
+
+        if ($user->hasRole(UserRoles::Student->value)) {
+            return $query->where('user_id', $user->id);
+        }
+
+        return $query->whereRaw('0 = 1');
     }
 
     // protected static function newFactory(): InvoiceFactory

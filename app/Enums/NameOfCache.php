@@ -19,4 +19,5 @@ enum NameOfCache: string {
     case Subscription = 'Subscription_all';
 
     case paymentMethod ='payment_methods';
+    case  Invoice='Invoices';
 }
